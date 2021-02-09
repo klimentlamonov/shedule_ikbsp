@@ -1,6 +1,6 @@
 # kbsp_schedule
 ![Alt-текст](https://psv4.userapi.com/c520036/u324049290/docs/d43/f59c078d12ca/shedule.png?extra=jo4mq4yBZIrdjWzVXqrkP9XZTQGlHjKbm1nLtpsjO_tbmuzY4MsF1R37KsfruPjSpIzcw6-CyO287cS3HXtCr61iBQyc6m2DreHVmWV3ziF308j_VPZrNQ5sl7UhrYs_Gld9wrW1uTV8ckazzYfWOw2kTK8 "kbsp_schedule")
-> *Project monitors the schedule change and reports about it.*
+> *Monitors the schedule*
 ____
 ### What is it? 
 :hushed:
