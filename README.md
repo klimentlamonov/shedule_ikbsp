@@ -11,7 +11,7 @@ and Special Instrumentation (IKBiSP).
 - The service monitors the page with the schedule for the students of IKBiSP 
 and provides it in a readable form.
 
->*Service functionality can be expanded...*
+*Service functionality can be expanded...*
 
 ### How it works?
 :construction_worker:
@@ -23,5 +23,5 @@ and if changes are found, it informs about it and update data.
 :alien:
 Project build on `Flask`. Using `openpyxl` for parsing.
 ___
-## Author 
+### Author 
 [vjki](https://github.com/vjki)
