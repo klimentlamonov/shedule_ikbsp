@@ -1,7 +1,7 @@
-import re, requests
+import re, requests, csv
 from openpyxl import load_workbook
 from bs4 import BeautifulSoup
-from os import path, listdir
+from os import path, listdir, remove
 
 # --- Globals ---
 url = 'https://www.mirea.ru/schedule/'
@@ -9,12 +9,28 @@ url = 'https://www.mirea.ru/schedule/'
 
 # --- Function ---
 def check_schedule(schedule_dir):
-    for sub_dir in range(1, 6):
-        current_dir = path.join(schedule_dir, str(sub_dir))
-        for file_name in listdir(current_dir):
-            print(f"Checking file {file_name}...")
-            wb = load_workbook(path.join(current_dir, file_name))
-            print('Last modified %s' % wb.properties.modified, end='\n\n')
+    """Check last modified.
+    Check last modified of all files and write it into lmod.csv.
+    lmod.csv contain view: (course),(file name),(last modified)
+
+    • schedule_dir - string which contain way to schedule dir
+
+    """
+    try:
+        remove(path.join(schedule_dir, 'lmod.csv'))
+        for sub_dir in range(1, 6):
+            current_dir = path.join(schedule_dir, str(sub_dir))
+            for file_name in listdir(current_dir):
+                print(f"Working with file \"{file_name}\"...")
+                wb = load_workbook(path.join(current_dir, file_name))
+                last_modified = wb.properties.modified
+                print(f'Last modified {last_modified}')
+                with open(path.join(schedule_dir, 'lmod.csv'), 'a', encoding='utf-8') as f:
+                    file_writer = csv.writer(f)
+                    file_writer.writerow([sub_dir, file_name, last_modified])
+                    print('Write SUCCESS', end='\n\n')
+    except OSError as e:
+        print(f'ERROR. {e}', end='\n\n')
 
 
 def get_schedule(schedule_dir):

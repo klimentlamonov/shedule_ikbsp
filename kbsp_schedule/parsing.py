@@ -3,13 +3,11 @@ from os import path, listdir
 
 
 # --- Exceptions for pars_main ---
-
 class WrongCellException(Exception):
     pass
 
 
 # --- Functions ---
-
 def get_files_name(schedule_dir):
     """Generate list of schedule files.
 
