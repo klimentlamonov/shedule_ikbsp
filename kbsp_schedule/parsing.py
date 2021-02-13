@@ -23,6 +23,8 @@ def pars_main(schedule_dir, *nmbs):
     """Parsing Excel.
     Function collects data from .xlsx file and return it as a list of dictionary.
 
+    • schedule_dir - string which contain way to schedule dir
+
     • nmbs - list with numbers of cell where the name of group located.
 
     • res - list with dictionaries.
