@@ -1,7 +1,8 @@
-import re, requests, csv
+import re, requests, csv, time
 from openpyxl import load_workbook
 from bs4 import BeautifulSoup
 from os import path, listdir, remove
+from datetime import datetime
 
 # --- Globals ---
 url = 'https://www.mirea.ru/schedule/'
@@ -9,9 +10,9 @@ url = 'https://www.mirea.ru/schedule/'
 
 # --- Function ---
 def check_schedule(schedule_dir):
-    """Check last modified.
-    Check last modified of all files and write it into lmod.csv.
-    lmod.csv contain view: (course),(file name),(last modified)
+    """Write in lmod.csv.
+    Check last modified and last update of all files and write it into lmod.csv.
+        view(lmod.csv): (course),(file name),(last modified),(last update)
 
     • schedule_dir - string which contain way to schedule dir
 
@@ -27,7 +28,9 @@ def check_schedule(schedule_dir):
                 print(f'Last modified {last_modified}')
                 with open(path.join(schedule_dir, 'lmod.csv'), 'a', encoding='utf-8') as f:
                     file_writer = csv.writer(f)
-                    file_writer.writerow([sub_dir, file_name, last_modified])
+                    t = path.getmtime(path.join(current_dir, file_name))
+                    last_update = datetime.fromtimestamp(t)
+                    file_writer.writerow([sub_dir, file_name, last_modified, last_update])
                     print('Write SUCCESS', end='\n\n')
     except OSError as e:
         print(f'ERROR. {e}', end='\n\n')

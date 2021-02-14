@@ -1,29 +1,45 @@
-import openpyxl
+import openpyxl, json
 from os import path, listdir
 
 
-# --- Exceptions for pars_main ---
-class WrongCellException(Exception):
-    pass
-
-
 # --- Functions ---
-def get_files_name(schedule_dir):
-    """Generate list of schedule files.
-
-    """
-    files = listdir(schedule_dir)
-    for file in files:
-        yield file
+def write_in_json(json_dir, schedule_d, course):
+    json_dir_full = path.join(json_dir, str(course))
+    json_name = schedule_d['Group'] + '.json'
+    with open(path.join(json_dir_full, json_name), 'w', encoding='utf-8') as f:
+        json.dump(schedule_d, f, ensure_ascii=False, indent=4)
 
 
-def pars_main(schedule_dir, *nmbs):
-    """Parsing Excel.
-    Function collects data from .xlsx file and return it as a list of dictionary.
+def pars_for_cells(schedule_dir):
+    """GENERATOR. Gets cells with group name.
+    Go throw th 2-nd row in xlsx and catch cells with group names. Yield
+    dictionary (d) with file name and cells.
+        view(d): (file name): list(cells)
 
     • schedule_dir - string which contain way to schedule dir
 
-    • nmbs - list with numbers of cell where the name of group located.
+    """
+    for sub_dir in range(1, 6):
+        current_dir = path.join(schedule_dir, str(sub_dir))
+        for file_name in listdir(current_dir):
+            full_path = path.join(current_dir, file_name)
+            d = {'full_path': full_path, 'course': sub_dir, 'cells': []}
+            wb = openpyxl.load_workbook(full_path)
+            sheet = wb.active
+            for row in sheet.iter_rows(2):
+                for cell in row:
+                    if cell.value is not None and '-' in str(cell.value):
+                        print(f"Catch group \"{cell.value}\" in file \"{file_name}\"", end="\n\n")
+                        d['cells'].append(cell.coordinate)
+                break
+            yield d
+
+
+def pars_main(d_cells, json_dir):
+    """Parsing Excel.
+    Function collects data from .xlsx file and return it as a list of dictionary.
+
+    • d_cells - dictionary with dull path to file and its cells with group name
 
     • res - list with dictionaries.
             view: [dict, dict, dict, ..., dict]
@@ -55,124 +71,118 @@ def pars_main(schedule_dir, *nmbs):
                     16(saturday):{...}
             }
     """
-    for file in get_files_name(schedule_dir):
-        print(f'Start parsing file {file}...')
-        res = []
-        wb = openpyxl.load_workbook(path.join(schedule_dir, file))
-        sheet = wb.active
-        for el in nmbs:
-            d = {'Group': None,
-                 11: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 12: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 13: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 14: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 15: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 16: {
-                     1: {111: [],
-                         112: []},
-                     2: {111: [],
-                         112: []},
-                     3: {111: [],
-                         112: []},
-                     4: {111: [],
-                         112: []},
-                     5: {111: [],
-                         112: []},
-                     6: {111: [],
-                         112: []}},
-                 }
-            count_nmb_weeks, count_weeks, count_lessons = 111, 11, 1
-            try:
-                xy = openpyxl.utils.coordinate_to_tuple(el)
-                if '-' not in sheet[el].value or xy[0] != 2:
-                    raise WrongCellException(
-                        f"FAIL.\nSeems like cell {el} have wrong input.\nCell input: [{sheet[el].value}]")
-                print('Collecting data for ' + sheet[el].value + '... ')
-                d['Group'] = sheet[el].value
-                for row in sheet[
-                           openpyxl.utils.get_column_letter(xy[1]) + str(xy[0] + 2):
-                           openpyxl.utils.get_column_letter(xy[1] + 3) + str(xy[0] + 73)]:
-                    for cell in row:
-                        d[count_weeks][count_lessons][count_nmb_weeks].append(cell.value)
-                    if count_nmb_weeks == 111:
-                        count_nmb_weeks += 1
-                    else:
-                        count_nmb_weeks -= 1
-                        count_lessons += 1
-                    if count_lessons > 6:
-                        count_weeks += 1
-                        count_lessons = 1
-                res.append(d)
-            except WrongCellException as e:
-                print(e, end='\n\n')
-            except:
-                print(f'FAIL.\nSomething go wrong. Probably the problem in cell [{el}]', end='\n\n')
-            else:
-                print('SUCCESS.', end='\n\n')
-    return res
+    full_path = d_cells['full_path']
+    cell_coordinate = d_cells['cells']
+    course = d_cells['course']
+    print(f'Start parsing file {full_path}...')
+    wb = openpyxl.load_workbook(full_path)
+    sheet = wb.active
+    for el in cell_coordinate:
+        d = {'Group': None,
+             11: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             12: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             13: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             14: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             15: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             16: {
+                 1: {111: [],
+                     112: []},
+                 2: {111: [],
+                     112: []},
+                 3: {111: [],
+                     112: []},
+                 4: {111: [],
+                     112: []},
+                 5: {111: [],
+                     112: []},
+                 6: {111: [],
+                     112: []}},
+             }
+        count_nmb_weeks, count_weeks, count_lessons = 111, 11, 1
+        try:
+            xy = openpyxl.utils.coordinate_to_tuple(el)
+            print('Collecting data for ' + sheet[el].value + '... ')
+            d['Group'] = sheet[el].value
+            for row in sheet[
+                       openpyxl.utils.get_column_letter(xy[1]) + str(xy[0] + 2):
+                       openpyxl.utils.get_column_letter(xy[1] + 3) + str(xy[0] + 73)]:
+                for cell in row:
+                    d[count_weeks][count_lessons][count_nmb_weeks].append(cell.value)
+                if count_nmb_weeks == 111:
+                    count_nmb_weeks += 1
+                else:
+                    count_nmb_weeks -= 1
+                    count_lessons += 1
+                if count_lessons > 6:
+                    count_weeks += 1
+                    count_lessons = 1
+            write_in_json(json_dir, d, course)
+        except:
+            print(f'FAIL.\nSomething go wrong. Probably the problem in cell [{el}]', end='\n\n')
+        else:
+            print('SUCCESS.', end='\n\n')
 
 
 if __name__ == "__main__":
-    print(
-        pars_main(path.join('..', 'schedule'), 'F2', 'K2', 'P2', 'Z2', 'AE2', 'AJ2',
-                  'AT2', 'AY2', 'BD2'))
+    for d in pars_for_cells(path.join('..', 'schedule')):
+        print(pars_main(d, path.join('..', 'json')))
