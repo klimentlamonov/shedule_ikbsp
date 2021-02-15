@@ -6,6 +6,10 @@ from datetime import datetime
 
 # --- Globals ---
 url = 'https://www.mirea.ru/schedule/'
+ERRORS = {
+    'check_schedule': [],
+    'get_schedule': []
+}
 
 
 # --- Function ---
@@ -27,13 +31,14 @@ def check_schedule(schedule_dir):
                 last_modified = wb.properties.modified
                 print(f'Last modified {last_modified}')
                 with open(path.join(schedule_dir, 'lmod.csv'), 'a', encoding='utf-8') as f:
-                    file_writer = csv.writer(f)
+                    file_writer = csv.writer(f, lineterminator='\n')
                     t = path.getmtime(path.join(current_dir, file_name))
                     last_update = datetime.fromtimestamp(t)
                     file_writer.writerow([sub_dir, file_name, last_modified, last_update])
                     print('Write SUCCESS', end='\n\n')
     except OSError as e:
         print(f'ERROR. {e}', end='\n\n')
+        ERRORS['check_schedule'].append(f'ERROR. {e}')
 
 
 def get_schedule(schedule_dir):
@@ -58,5 +63,5 @@ def get_schedule(schedule_dir):
 
 
 if __name__ == "__main__":
-    # get_schedule(path.join('..', 'schedule'))
+    get_schedule(path.join('..', 'schedule'))
     check_schedule(path.join('..', 'schedule'))

@@ -1,13 +1,35 @@
 import openpyxl, json
 from os import path, listdir
 
+# --- Globals ---
+ERRORS = {
+    'write_in_json': [],
+    'pars_for_cells': [],
+    'pars_main': []
+}
+
 
 # --- Functions ---
 def write_in_json(json_dir, schedule_d, course):
+    """Write groups schedule in json file
+
+    • json_dir - string which contain way to json dir
+
+    • schedule_d - dictionary with groups schedule data
+
+    • course - group number of the course
+    """
     json_dir_full = path.join(json_dir, str(course))
+    if '/' in schedule_d['Group']:
+        schedule_d['Group'] = schedule_d['Group'].replace('/', ',')
     json_name = schedule_d['Group'] + '.json'
-    with open(path.join(json_dir_full, json_name), 'w', encoding='utf-8') as f:
-        json.dump(schedule_d, f, ensure_ascii=False, indent=4)
+    try:
+        with open(path.join(json_dir_full, json_name), 'w', encoding='utf-8') as f:
+            json.dump(schedule_d, f, ensure_ascii=False, indent=4)
+        print("SUCCESS. File written well.")
+    except:
+        print(f"FAIL. File {json_name} did not write well.")
+        ERRORS['write_in_json'].append(f"FAIL. File {json_name} did not write well.")
 
 
 def pars_for_cells(schedule_dir):
@@ -29,9 +51,10 @@ def pars_for_cells(schedule_dir):
             for row in sheet.iter_rows(2):
                 for cell in row:
                     if cell.value is not None and '-' in str(cell.value):
-                        print(f"Catch group \"{cell.value}\" in file \"{file_name}\"", end="\n\n")
+                        print(f"Catch group \"{cell.value}\" in file \"{file_name}\"", end="\n")
                         d['cells'].append(cell.coordinate)
                 break
+            print()
             yield d
 
 
@@ -179,6 +202,7 @@ def pars_main(d_cells, json_dir):
             write_in_json(json_dir, d, course)
         except:
             print(f'FAIL.\nSomething go wrong. Probably the problem in cell [{el}]', end='\n\n')
+            ERRORS['pars_main'].append(f'FAIL.\nSomething go wrong. Probably the problem in cell [{el}]')
         else:
             print('SUCCESS.', end='\n\n')
 
