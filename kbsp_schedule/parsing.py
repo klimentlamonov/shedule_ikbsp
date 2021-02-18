@@ -1,4 +1,13 @@
-import openpyxl, json
+#!/usr/bin/env/ python
+# -*- coding: utf-8 -*-
+#
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Source: https://github.com/vjki/kbsp_schedule #
+# # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#
+import openpyxl
+import json
 from os import path, listdir
 
 # --- Globals ---

@@ -1,3 +1,11 @@
+#!/usr/bin/env/ python
+# -*- coding: utf-8 -*-
+#
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Source: https://github.com/vjki/kbsp_schedule #
+# # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#
 import csv
 from kbsp_schedule import getting, parsing
 from os import path

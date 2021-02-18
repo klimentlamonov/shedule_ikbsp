@@ -1,4 +1,15 @@
-import re, requests, csv, time
+#!/usr/bin/env/ python
+# -*- coding: utf-8 -*-
+#
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Source: https://github.com/vjki/kbsp_schedule #
+# # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#
+import re
+import requests
+import csv
+import time
 from openpyxl import load_workbook
 from bs4 import BeautifulSoup
 from os import path, listdir, remove

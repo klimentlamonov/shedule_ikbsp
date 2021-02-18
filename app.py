@@ -1,3 +1,11 @@
+#!/usr/bin/env/ python
+# -*- coding: utf-8 -*-
+#
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Source: https://github.com/vjki/kbsp_schedule #
+# # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#
 from flask import Flask, render_template, url_for
 
 app = Flask(__name__)
